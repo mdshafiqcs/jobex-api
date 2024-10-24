@@ -164,3 +164,48 @@ export const updateProfile = asyncHandler(async (req, res) => {
     new ApiResponse(200, {user}, "Profile Updated Successfully!!")
   )
 })
+
+
+
+export const updateResume = asyncHandler(async (req, res) => {
+
+  const user = req.user;
+
+  if(req.files && Array.isArray(req.files.resume) && req.files.resume.length > 0){
+    let localPath = req.files.resume[0].path;
+
+    if(!localPath) {
+      throw new ApiError(400, "Please select a resume pdf file");
+    }
+
+    let resume = await uploadOnCloudinary(localPath);
+
+    if(resume){
+      if(user.cloudinaryPublicId?.resume){
+        await deleteFromCloudinary(user.cloudinaryPublicId?.resume);
+      }
+      user.profile.resume = resume.url;
+      user.profile.resumeOriginalName = req.files.resume[0].originalname;
+      user.cloudinaryPublicId.resume = resume.public_id;
+
+      await user.save();
+
+      const resumeData = {
+        resume: user.profile.resume, 
+        resumeOriginalName:  user.profile.resumeOriginalName 
+      }
+
+      return res.status(200).json(
+        new ApiResponse(200, resumeData, "Resume Uploaded Successfully!!")
+      )
+
+    } else {
+      throw new ApiError(500, "Failed to upload resume");
+    }
+  } else {
+    throw new ApiError(400, "Please select a resume pdf file")
+  }
+})
+
+
+
