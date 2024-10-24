@@ -86,3 +86,27 @@ export const login = asyncHandler(async (req, res) => {
       }, `Welcome back ${user.fullname}`)
     );
 })
+
+export const getUser = asyncHandler(async (req, res) => {
+  const user = req.user;
+
+  return res.status(200).json(
+    new ApiResponse(200, { user }, "" ),
+  )
+})
+
+export const logout = asyncHandler(async (req, res) => {
+  await User.findByIdAndUpdate(
+    req.user._id, 
+    {
+      $set: {refreshToken: undefined}
+    }
+  );
+
+  return res.status(200)
+  .clearCookie("accessToken", cookieOptions)
+  .clearCookie("refreshToken", cookieOptions)
+  .json(
+    new ApiResponse(200, null, "Logout Successful")
+  )
+})
