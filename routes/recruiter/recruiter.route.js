@@ -23,10 +23,12 @@ router.route("/update-profile").post( upload.fields([ {name: "profilePhoto", max
 // router imports
 import companyRouter from "./company.route.js"
 import jobRouter from "./job.route.js"
+import applicationRouter from "./application.route.js"
 
 
 router.use("/company", companyRouter);
 router.use("/job", jobRouter);
+router.use("/application", applicationRouter);
 
 
 export default router;
