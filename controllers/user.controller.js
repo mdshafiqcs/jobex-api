@@ -1,6 +1,7 @@
 import { User } from "../models/index.js";
 import { ApiError, ApiResponse, asyncHandler  } from "../utils/index.js"
 import bcrypt from "bcrypt"
+import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/index.js";
 
 
 const cookieOptions = {
@@ -108,5 +109,58 @@ export const logout = asyncHandler(async (req, res) => {
   .clearCookie("refreshToken", cookieOptions)
   .json(
     new ApiResponse(200, null, "Logout Successful")
+  )
+})
+
+
+
+export const updateProfile = asyncHandler(async (req, res) => {
+  const {fullname, phone, bio, skills} = req.body;
+
+  const user = req.user;
+
+  if(req.files && Array.isArray(req.files.profilePhoto) && req.files.profilePhoto.length > 0){
+    let localPath = req.files.profilePhoto[0].path;
+
+    let profilePhoto;
+
+    if(localPath) {
+      profilePhoto = await uploadOnCloudinary(localPath);
+    }
+
+    if(profilePhoto){
+      if(user.cloudinaryPublicId?.profilePhoto){
+        await deleteFromCloudinary(user.cloudinaryPublicId?.profilePhoto);
+      }
+      user.profile.profilePhoto = profilePhoto.url;
+      user.cloudinaryPublicId.profilePhoto = profilePhoto.public_id;
+    }
+  }
+
+  user.fullname = fullname;
+  user.phone = phone;
+  user.profile.bio = bio;
+
+  if(skills === ""){
+    user.profile.skills = []
+  } else if(skills && skills !== ""){
+    let skillsArray = skills ? skills.split(",") : undefined;
+    skillsArray = skillsArray?.filter((item) => {
+      if(item){
+        return item;
+      }
+    })
+    
+    if(skillsArray) {
+      user.profile.skills = skillsArray.map((skill) => skill.toString().trim());
+    };
+  }
+
+  // other profile section comes here later
+
+  await user.save();
+
+  return res.status(200).json(
+    new ApiResponse(200, {user}, "Profile Updated Successfully!!")
   )
 })
