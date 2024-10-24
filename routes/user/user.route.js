@@ -16,7 +16,11 @@ router.route("/logout").get(jobseeker, logout);
 router.route("/update-profile").post( upload.fields([ {name: "profilePhoto", maxCount: 1}]), authValidator.updateProfile, jobseeker, updateProfile);
 router.route("/update-resume").post( upload.fields([ {name: "resume", maxCount: 1}]), jobseeker, updateResume);
 
+// route imports
+import jobRouter from "./job.route.js"
 
+
+router.use("/job", jobRouter);
 
 
 export default router;
