@@ -17,6 +17,9 @@ import authRouter from "./routes/auth.route.js"
 import userRouter from "./routes/user/user.route.js"
 import recruiterRouter from "./routes/recruiter/recruiter.route.js";
 
+app.get("/", (req, res) => {
+  res.status(200).send("hello from server");
+})
 
 // routes declaration
 app.use("/api/v1/auth", authRouter);
