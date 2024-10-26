@@ -1,6 +1,13 @@
 import { Router } from "express";
 
-import { getCategories, createCategory, getLocations, createLocation } from "../../controllers/admin/settings.controller.js";
+import { 
+  getCategories, 
+  createCategory, 
+  getLocations, 
+  createLocation, 
+  getSalaries,
+  createSalary,
+} from "../../controllers/admin/settings.controller.js";
 
 
 // middleware imports
@@ -14,5 +21,8 @@ router.route("/create-category").post(settingValidator.createCategory, createCat
 
 router.route("/locations").get(getLocations);
 router.route("/create-location").post(settingValidator.createLocation, createLocation);
+
+router.route("/salaries").get(getSalaries);
+router.route("/create-salary").post(settingValidator.createSalary, createSalary);
 
 export default router;
