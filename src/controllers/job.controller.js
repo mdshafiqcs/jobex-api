@@ -299,9 +299,6 @@ export const getAllJobs = asyncHandler(async(req, res) => {
     },
   
 
-    
-  
-
     {
       $project: {
         createdBy: 0,
@@ -457,14 +454,49 @@ export const getJobById = asyncHandler(async(req, res) => {
         ],
       }
     },
+
+    {
+      $lookup: {
+        from: 'locations',
+        localField: 'location',
+        foreignField: '_id',
+        as: "location",
+        pipeline: [
+          {
+            $project: {
+              name: 1,
+            }
+          }
+        ]
+      }
+    },
+
     {
       $addFields: {
         company: {
             $first: "$company"
           },
+        location: {
+            $first: "$location"
+          },
         applicationCount: {
           $size: "$applications"
         },
+        minSalary: {
+          $cond: {
+            if: { $eq: ["$salary.isNegotiable", true] },
+            then: null, // or undefined
+            else: "$salary.min"
+          }
+        },
+        maxSalary: {
+          $cond: {
+            if: { $eq: ["$salary.isNegotiable", true] },
+            then: null, // or undefined
+            else: "$salary.max"
+          }
+        },
+        isNegotiable: "$salary.isNegotiable",
       }
     },
 
@@ -472,6 +504,8 @@ export const getJobById = asyncHandler(async(req, res) => {
       $project: {
         createdBy: 0,
         updatedAt: 0,
+        category: 0,
+        salary: 0,
       }
     }
     
