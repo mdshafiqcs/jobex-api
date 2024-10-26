@@ -30,7 +30,7 @@ const postJob = [
     .notEmpty()
     .withMessage("categoryId is required")
     .escape(),
-    
+
   body('locationId')
     .trim()
     .notEmpty()
@@ -59,6 +59,12 @@ const postJob = [
     .trim()
     .notEmpty()
     .withMessage("experience level field is required")
+    .escape(),
+
+  body('deadline')
+    .trim()
+    .notEmpty()
+    .withMessage("deadline field is required")
     .escape(),
 
   body('companyId')

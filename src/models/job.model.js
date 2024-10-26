@@ -72,6 +72,11 @@ const jobSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+
+  deadline: {
+    type: Date,
+    required: true,
+  },
   
 
 }, {timestamps: true})

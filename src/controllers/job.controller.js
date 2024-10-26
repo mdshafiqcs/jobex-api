@@ -21,6 +21,7 @@ export const postJob = asyncHandler(async(req, res) => {
     jobRole, 
     positions, 
     experienceLevel, 
+    deadline,
     companyId 
   } = req.body;
 
@@ -77,6 +78,7 @@ export const postJob = asyncHandler(async(req, res) => {
     experienceLevel: experienceLevel,
     company: company._id,
     createdBy: userId,
+    deadline,
   });
 
 
