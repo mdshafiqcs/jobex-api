@@ -12,6 +12,17 @@ const createCategory = [
   validationHandler,
 ];
 
+const createLocation = [
+  body('name')
+    .trim()
+    .notEmpty()
+    .withMessage("name field is required")
+    .escape(),
+
+  validationHandler,
+];
+
 export default {
   createCategory,
+  createLocation,
 }
