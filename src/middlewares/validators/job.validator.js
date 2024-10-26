@@ -21,16 +21,26 @@ const postJob = [
     .withMessage("requirements field is required")
     .escape(),
 
-  body('salary')
+  body('isNegotiable')
     .notEmpty()
-    .withMessage("salary field is required")
-    .isInt()
-    .withMessage("salary must be integer"),
+    .withMessage("isNegotiable field is required"),
 
-  body('location')
+  body('categoryId')
     .trim()
     .notEmpty()
-    .withMessage("location field is required")
+    .withMessage("categoryId is required")
+    .escape(),
+    
+  body('locationId')
+    .trim()
+    .notEmpty()
+    .withMessage("locationId is required")
+    .escape(),
+
+  body('address')
+    .trim()
+    .notEmpty()
+    .withMessage("address field is required")
     .escape(),
 
   body('jobType')

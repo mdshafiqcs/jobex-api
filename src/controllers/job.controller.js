@@ -1,5 +1,6 @@
 import { ApiError, ApiResponse, asyncHandler } from "../utils/index.js";
 import { Job, Company } from "../models/index.js";
+import { Location, Category } from "../models/admin/index.js";
 import { pagenateOption } from "../utils/index.js"
 import mongoose, { isValidObjectId } from "mongoose";
 
@@ -10,8 +11,12 @@ export const postJob = asyncHandler(async(req, res) => {
     title, 
     description, 
     requirements, 
-    salary, 
-    location, 
+    categoryId,
+    minSalary, 
+    maxSalary, 
+    isNegotiable,
+    address, 
+    locationId, 
     jobType, 
     jobRole, 
     positions, 
@@ -20,6 +25,30 @@ export const postJob = asyncHandler(async(req, res) => {
   } = req.body;
 
   const userId = req.user._id;
+
+  if(!isValidObjectId(categoryId)){
+    throw new ApiError(400, "Invalid categoryId format, can not parse to ObjectId");
+  }
+
+  const category = await Category.findOne({_id: categoryId});
+
+  if(!category){
+    throw new ApiError(404, "Category not found");
+  }
+
+  if(!isValidObjectId(locationId)){
+    throw new ApiError(400, "Invalid locationId format, can not parse to ObjectId");
+  }
+
+  const location = await Location.findOne({_id: locationId});
+
+  if(!location){
+    throw new ApiError(404, "Location not found");
+  }
+
+  if(!isValidObjectId(companyId)){
+    throw new ApiError(400, "Invalid companyId format, can not parse to ObjectId");
+  }
 
   const company = await Company.findOne({_id: companyId, userId})
   
@@ -34,15 +63,24 @@ export const postJob = asyncHandler(async(req, res) => {
     title, 
     description, 
     requirements: requirementsArray.map((item) => item.toString().trim()), 
-    salary: Number(salary), 
-    location, 
+    address, 
+    location: location._id, 
+    category: category._id,
     jobType, 
     jobRole, 
+    salary: {
+      min: minSalary, 
+      max: maxSalary, 
+      isNegotiable,
+    },
     positions: Number(positions), 
     experienceLevel: experienceLevel,
-    company: companyId,
+    company: company._id,
     createdBy: userId,
-  })
+  });
+
+
+  await job.save();
 
   if(!job){
     throw new ApiError(500, "Something went wrong while posting new job");

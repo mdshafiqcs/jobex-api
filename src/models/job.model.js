@@ -21,12 +21,22 @@ const jobSchema = new mongoose.Schema({
   requirements: [{ type: String }],
 
   salary: {
-    type: Number,
+    min: Number,
+    max: Number,
+    isNegotiable: {
+      type: Boolean,
+      default: false,
+    },
+  },
+
+  address: {
+    type: String,
     required: true,
   },
 
   location: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Location",
     required: true,
   },
 
