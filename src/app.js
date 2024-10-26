@@ -16,6 +16,7 @@ app.use(express.static("public"));
 import authRouter from "./routes/auth.route.js"
 import userRouter from "./routes/user/user.route.js"
 import recruiterRouter from "./routes/recruiter/recruiter.route.js";
+import adminRouter from "./routes/admin/admin.route.js";
 
 app.get("/", (req, res) => {
   res.status(200).send("hello from server");
@@ -25,6 +26,7 @@ app.get("/", (req, res) => {
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/recruiter", recruiterRouter);
+app.use("/api/v1/admin", adminRouter);
 
 
 app.use(errorHandler)
