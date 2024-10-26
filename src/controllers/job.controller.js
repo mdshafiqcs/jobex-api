@@ -303,7 +303,6 @@ export const getAllJobs = asyncHandler(async(req, res) => {
       $project: {
         createdBy: 0,
         updatedAt: 0,
-        category: 0,
         salary: 0,
       }
     },
@@ -331,12 +330,45 @@ export const getRecruiterJobs = asyncHandler(async(req, res) => {
   const limit = req.query.limit || 10;
 
   const aggregate = Job.aggregate([
-    
+
     {
       $match: {
-        createdBy: req.user._id // here _id is already objectId, so we don't have to parse
+        createdBy: req.user._id // here _id is already objectId, so we don't have to parse to ObjectId
       }
     },
+
+    {
+      $lookup: {
+        from: 'locations',
+        localField: 'location',
+        foreignField: '_id',
+        as: "location",
+        pipeline: [
+          {
+            $project: {
+              name: 1,
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      $lookup: {
+        from: 'categories',
+        localField: 'category',
+        foreignField: '_id',
+        as: "category",
+        pipeline: [
+          {
+            $project: {
+              name: 1,
+            }
+          }
+        ]
+      }
+    },
+
     {
       $lookup: {
         from: 'companies',
@@ -356,6 +388,7 @@ export const getRecruiterJobs = asyncHandler(async(req, res) => {
         ]
       }
     },
+    
     {
       $lookup: {
         from: 'applications',
@@ -371,20 +404,48 @@ export const getRecruiterJobs = asyncHandler(async(req, res) => {
         ],
       }
     },
+
     {
       $addFields: {
         company: {
             $first: "$company"
           },
+
+        location: {
+            $first: "$location"
+          },
+
+        category: {
+            $first: "$category"
+          },
+          
         applicationCount: {
           $size: "$applications"
         },
+
+        minSalary: {
+          $cond: {
+            if: { $eq: ["$salary.isNegotiable", true] },
+            then: null, // or undefined
+            else: "$salary.min"
+          }
+        },
+        maxSalary: {
+          $cond: {
+            if: { $eq: ["$salary.isNegotiable", true] },
+            then: null, // or undefined
+            else: "$salary.max"
+          }
+        },
+        isNegotiable: "$salary.isNegotiable",
       }
     },
+
     {
       $project: {
         createdBy: 0,
         updatedAt: 0,
+        salary: 0,
       }
     },
     {
@@ -472,16 +533,39 @@ export const getJobById = asyncHandler(async(req, res) => {
     },
 
     {
+      $lookup: {
+        from: 'categories',
+        localField: 'category',
+        foreignField: '_id',
+        as: "category",
+        pipeline: [
+          {
+            $project: {
+              name: 1,
+            }
+          }
+        ]
+      }
+    },
+
+    {
       $addFields: {
         company: {
             $first: "$company"
           },
+
         location: {
             $first: "$location"
           },
+
+        category: {
+            $first: "$category"
+          },
+
         applicationCount: {
           $size: "$applications"
         },
+        
         minSalary: {
           $cond: {
             if: { $eq: ["$salary.isNegotiable", true] },
@@ -489,6 +573,7 @@ export const getJobById = asyncHandler(async(req, res) => {
             else: "$salary.min"
           }
         },
+
         maxSalary: {
           $cond: {
             if: { $eq: ["$salary.isNegotiable", true] },
@@ -496,6 +581,7 @@ export const getJobById = asyncHandler(async(req, res) => {
             else: "$salary.max"
           }
         },
+
         isNegotiable: "$salary.isNegotiable",
       }
     },
@@ -504,7 +590,6 @@ export const getJobById = asyncHandler(async(req, res) => {
       $project: {
         createdBy: 0,
         updatedAt: 0,
-        category: 0,
         salary: 0,
       }
     }
