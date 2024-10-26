@@ -63,6 +63,8 @@ export const postJob = asyncHandler(async(req, res) => {
 
 
 export const getAllJobs = asyncHandler(async(req, res) => {
+  const categoryId = req.query.categoryId || "";
+  const location = req.query.location || "";
   const keyword = req.query.keyword || "";
   const currentPage = req.query.page || 1;
   const limit = req.query.limit || 10;

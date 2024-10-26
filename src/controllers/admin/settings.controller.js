@@ -1,4 +1,4 @@
-import { Category } from "../../models/category.model.js";
+import { Category } from "../../models/admin/category.model.js";
 import { ApiError, ApiResponse, asyncHandler } from "../../utils/index.js";
 
 
