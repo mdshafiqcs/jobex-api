@@ -22,18 +22,8 @@ const createLocation = [
   validationHandler,
 ];
 
-const createSalary = [
-  body('min')
-    .trim()
-    .notEmpty()
-    .withMessage("min field is required")
-    .escape(),
-
-  validationHandler,
-];
 
 export default {
   createCategory,
   createLocation,
-  createSalary,
 }

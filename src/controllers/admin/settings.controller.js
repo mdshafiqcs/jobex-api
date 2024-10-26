@@ -1,4 +1,4 @@
-import { Location, Category, Salary} from "../../models/admin/index.js";
+import { Location, Category } from "../../models/admin/index.js";
 
 
 import { ApiError, ApiResponse, asyncHandler } from "../../utils/index.js";
@@ -68,41 +68,5 @@ export const getLocations = asyncHandler(async (req, res) => {
   return res.status(200)
     .json(
       new ApiResponse(200, { locations }, "")
-    );
-})
-
-
-
-export const createSalary = asyncHandler(async (req, res) => {
-  const { min, max } = req.body;
-
-  const existingSalary = await Location.findOne({min, max});
-
-  if(existingSalary){
-    throw new ApiError(409, "Salary already exists with this min and max value");
-  }
-
-  const salary = await Salary.create({
-    min, 
-    max, 
-  });
-
-  if(!salary){
-    throw new ApiError(500, "Something went wrong while adding salary range, try again later");
-  }
-
-  return res.status(201)
-    .json(
-      new ApiResponse(201, { salary }, "Salary range Added Successfully.")
-    );
-});
-
-export const getSalaries = asyncHandler(async (req, res) => {
-
-  const salaries = await Salary.find({});
-
-  return res.status(200)
-    .json(
-      new ApiResponse(200, { salaries }, "")
     );
 })

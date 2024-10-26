@@ -5,8 +5,7 @@ import {
   createCategory, 
   getLocations, 
   createLocation, 
-  getSalaries,
-  createSalary,
+  
 } from "../../controllers/admin/settings.controller.js";
 
 
@@ -21,8 +20,5 @@ router.route("/create-category").post(settingValidator.createCategory, createCat
 
 router.route("/locations").get(getLocations);
 router.route("/create-location").post(settingValidator.createLocation, createLocation);
-
-router.route("/salaries").get(getSalaries);
-router.route("/create-salary").post(settingValidator.createSalary, createSalary);
 
 export default router;
