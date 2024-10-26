@@ -2,7 +2,7 @@ import { ApiError, ApiResponse, asyncHandler } from "../utils/index.js";
 import { Job, Company } from "../models/index.js";
 import { Location, Category } from "../models/admin/index.js";
 import { pagenateOption } from "../utils/index.js"
-import mongoose, { isValidObjectId } from "mongoose";
+import mongoose, { isValidObjectId, } from "mongoose";
 
 
 export const postJob = asyncHandler(async(req, res) => {
@@ -103,22 +103,71 @@ export const postJob = asyncHandler(async(req, res) => {
 
 
 export const getAllJobs = asyncHandler(async(req, res) => {
+
   const categoryId = req.query.categoryId || "";
-  const location = req.query.location || "";
+  const locationId = req.query.locationId || "";
   const keyword = req.query.keyword || "";
   const currentPage = req.query.page || 1;
   const limit = req.query.limit || 10;
 
+
+  const minSalaryFilter = req.query.minSalary ? parseInt(req.query.minSalary, 10) : null;
+  const maxSalaryFilter = req.query.maxSalary ? parseInt(req.query.maxSalary, 10) : null;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   const aggregate = Job.aggregate([
-    
+
     {
       $match: {
-        $or: [
-          { title: { $regex: keyword, $options: 'i' } },
-          { description: { $regex: keyword, $options: 'i' } },
+        $and: [
+          {
+            $or: [
+              { title: { $regex: keyword, $options: 'i' } },
+              { description: { $regex: keyword, $options: 'i' } },
+            ]
+          },
+          {
+            deadline: { $gte: today }
+          },
+          
         ]
       }
     },
+
+    {
+      $lookup: {
+        from: 'locations',
+        localField: 'location',
+        foreignField: '_id',
+        as: "location",
+        pipeline: [
+          {
+            $project: {
+              name: 1,
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      $lookup: {
+        from: 'categories',
+        localField: 'category',
+        foreignField: '_id',
+        as: "category",
+        pipeline: [
+          {
+            $project: {
+              name: 1,
+            }
+          }
+        ]
+      }
+    },
+
     {
       $lookup: {
         from: 'companies',
@@ -138,6 +187,7 @@ export const getAllJobs = asyncHandler(async(req, res) => {
         ]
       }
     },
+    
     {
       $lookup: {
         from: 'applications',
@@ -153,20 +203,111 @@ export const getAllJobs = asyncHandler(async(req, res) => {
         ],
       }
     },
+
     {
       $addFields: {
         company: {
             $first: "$company"
           },
+
+        location: {
+            $first: "$location"
+          },
+
+        category: {
+            $first: "$category"
+          },
+          
         applicationCount: {
           $size: "$applications"
         },
+
+        minSalary: {
+          $cond: {
+            if: { $eq: ["$salary.isNegotiable", true] },
+            then: null, // or undefined
+            else: "$salary.min"
+          }
+        },
+        maxSalary: {
+          $cond: {
+            if: { $eq: ["$salary.isNegotiable", true] },
+            then: null, // or undefined
+            else: "$salary.max"
+          }
+        },
+        isNegotiable: "$salary.isNegotiable",
       }
     },
+
+    {
+      $match: {
+        ...(locationId ? { "location._id": mongoose.Types.ObjectId.createFromHexString(locationId) } : {}),
+        ...(categoryId ? { "category._id": mongoose.Types.ObjectId.createFromHexString(categoryId) } : {}),
+      }
+    },
+
+    {
+      $match: {
+        $or: [
+          {
+            // If minSalary and maxSalary are provided, check for isNegotiable true
+            $and: [
+              { "isNegotiable": true },
+              { $expr: { $eq: [minSalaryFilter, null] } },
+              { $expr: { $eq: [maxSalaryFilter, null] } }
+            ]
+          },
+          {
+            // Jobs with isNegotiable false
+            "isNegotiable": false,
+            ...(minSalaryFilter !== null || maxSalaryFilter !== null ? {
+              $and: [
+                {
+                  $or: [
+                    {
+                      $and: [
+                        { minSalary: { $gte: minSalaryFilter } },
+                        { maxSalary: { $lte: maxSalaryFilter } }
+                      ]
+                    },
+                    {
+                      $and: [
+                        { minSalary: null },
+                        { maxSalary: null }
+                      ]
+                    },
+                    {
+                      $and: [
+                        { minSalary: { $gte: minSalaryFilter } },
+                        { maxSalary: null }
+                      ]
+                    },
+                    {
+                      $and: [
+                        { minSalary: null },
+                        { maxSalary: { $lte: maxSalaryFilter } }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            } : {})
+          }
+        ]
+      }
+    },
+  
+
+    
+  
+
     {
       $project: {
         createdBy: 0,
         updatedAt: 0,
+        category: 0,
+        salary: 0,
       }
     },
     {
