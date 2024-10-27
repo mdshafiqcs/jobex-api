@@ -19,10 +19,12 @@ router.route("/update-resume").post( upload.fields([ {name: "resume", maxCount: 
 // route imports
 import jobRouter from "./job.route.js"
 import applicationRouter from "./application.route.js"
+import commonRouter from "../common.route.js"
 
 
 router.use("/job", jobRouter);
 router.use("/application", applicationRouter);
+router.use("/common", commonRouter);
 
 
 export default router;
