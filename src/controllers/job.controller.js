@@ -255,8 +255,6 @@ export const searchJobs = asyncHandler(async(req, res) => {
   const keyword = req.query.keyword || "";
   const currentPage = req.query.page || 1;
   const limit = req.query.limit || 10;
-
-
   const minSalaryFilter = req.query.minSalary ? parseInt(req.query.minSalary, 10) : null;
   const maxSalaryFilter = req.query.maxSalary ? parseInt(req.query.maxSalary, 10) : null;
 
