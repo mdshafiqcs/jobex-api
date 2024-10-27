@@ -7,13 +7,14 @@ import { ApiError, ApiResponse, asyncHandler } from "../../utils/index.js";
 export const createCategory = asyncHandler(async (req, res) => {
   const { name } = req.body;
 
-  const existingLocation = await Category.findOne({name});
+  const existingCategory = await Category.findOne({name});
+  
 
-  if(existingLocation){
-    throw new ApiError(409, "Location already exists with this name");
+  if(existingCategory){
+    throw new ApiError(409, "Category already exists with this name");
   }
 
-  const category = await Location.create({
+  const category = await Category.create({
     name, 
   });
 
