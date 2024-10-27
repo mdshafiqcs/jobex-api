@@ -1,4 +1,4 @@
-import { Location, Category } from "../../models/admin/index.js";
+import { Location, Category } from "../../models/index.js";
 
 
 import { ApiError, ApiResponse, asyncHandler } from "../../utils/index.js";

@@ -1,6 +1,6 @@
 import { ApiError, ApiResponse, asyncHandler } from "../utils/index.js";
 import { Job, Company } from "../models/index.js";
-import { Location, Category } from "../models/admin/index.js";
+import { Location, Category } from "../models/index.js";
 import { pagenateOption } from "../utils/index.js"
 import mongoose, { isValidObjectId, } from "mongoose";
 
