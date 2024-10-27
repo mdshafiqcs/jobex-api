@@ -104,6 +104,152 @@ export const postJob = asyncHandler(async(req, res) => {
 
 export const getAllJobs = asyncHandler(async(req, res) => {
 
+  const currentPage = req.query.page || 1;
+  const limit = req.query.limit || 10;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const aggregate = Job.aggregate([
+
+    {
+      $match: {
+        deadline: { $gte: today },
+      }
+    },
+
+    {
+      $lookup: {
+        from: 'locations',
+        localField: 'location',
+        foreignField: '_id',
+        as: "location",
+        pipeline: [
+          {
+            $project: {
+              name: 1,
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      $lookup: {
+        from: 'categories',
+        localField: 'category',
+        foreignField: '_id',
+        as: "category",
+        pipeline: [
+          {
+            $project: {
+              name: 1,
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      $lookup: {
+        from: 'companies',
+        localField: 'company',
+        foreignField: '_id',
+        as: "company",
+        pipeline: [
+          {
+            $project: {
+              name: 1,
+              description: 1,
+              website: 1,
+              location: 1,
+              logo: 1,
+            }
+          }
+        ]
+      }
+    },
+    
+    {
+      $lookup: {
+        from: 'applications',
+        localField: '_id',
+        foreignField: 'job',
+        as: "applications",
+        pipeline: [
+          {
+            $project: {
+              applicant: 1,
+            }
+          }
+        ],
+      }
+    },
+
+    {
+      $addFields: {
+        company: {
+            $first: "$company"
+          },
+
+        location: {
+            $first: "$location"
+          },
+
+        category: {
+            $first: "$category"
+          },
+          
+        applicationCount: {
+          $size: "$applications"
+        },
+
+        minSalary: {
+          $cond: {
+            if: { $eq: ["$salary.isNegotiable", true] },
+            then: null, // or undefined
+            else: "$salary.min"
+          }
+        },
+        maxSalary: {
+          $cond: {
+            if: { $eq: ["$salary.isNegotiable", true] },
+            then: null, // or undefined
+            else: "$salary.max"
+          }
+        },
+        isNegotiable: "$salary.isNegotiable",
+      }
+    },
+
+    {
+      $project: {
+        createdBy: 0,
+        updatedAt: 0,
+        salary: 0,
+      }
+    },
+    {
+      $sort: {
+        createdAt: -1
+      }
+    }
+  ]);
+
+  const jobs = await Job.aggregatePaginate(
+    aggregate, 
+    pagenateOption(currentPage, limit, "jobs")
+  )
+
+  return res.status(200)
+  .json(
+    new ApiResponse(200, jobs, "")
+  );
+
+})
+
+export const searchJobs = asyncHandler(async(req, res) => {
+
   const categoryId = req.query.categoryId || "";
   const locationId = req.query.locationId || "";
   const keyword = req.query.keyword || "";
