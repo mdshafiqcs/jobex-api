@@ -226,6 +226,8 @@ export const getAllJobs = asyncHandler(async(req, res) => {
       $project: {
         createdBy: 0,
         updatedAt: 0,
+        applications: 0,
+
         salary: 0,
       }
     },
@@ -447,6 +449,7 @@ export const searchJobs = asyncHandler(async(req, res) => {
       $project: {
         createdBy: 0,
         updatedAt: 0,
+        applications: 0,
         salary: 0,
       }
     },
