@@ -5,7 +5,8 @@ import mongoose, { isValidObjectId } from "mongoose";
 import { ApplicationStatusEnum } from "../constants.js";
 
 
-export const allApplications = asyncHandler(async(req,res) => {
+
+export const allApplicationsByJobId = asyncHandler(async(req,res) => {
   const currentPage = req.query.page || 1;
   const limit = req.query.limit || 10;
   const jobId = req.params.jobId;
