@@ -62,6 +62,14 @@ export const allApplicationsByJobId = asyncHandler(async(req,res) => {
     },
 
     {
+      $addFields: {
+        applicant: {
+            $first: "$applicant"
+        },
+      }
+    },
+
+    {
       $sort: {
         createdAt: 1
       }
