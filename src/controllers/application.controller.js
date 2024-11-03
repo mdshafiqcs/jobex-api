@@ -88,6 +88,27 @@ export const allApplicationsByJobId = asyncHandler(async(req,res) => {
 
 })
 
+export const getApplicationById = asyncHandler(async(req,res) => {
+
+  const applicationId = req.params.applicationId;
+
+  if(!isValidObjectId(applicationId)){
+    throw new ApiError(400, "Invalid ApplicationId format, can not parse to ObjectId")
+  }
+
+  const application = await Application.findById(applicationId).populate("applicant","profile fullname email");
+
+  if(!application){
+    throw new ApiError(404, "Application not found");
+  }
+
+  return res.status(200)
+  .json(
+    new ApiResponse(200, application, "")
+  );
+
+})
+
 
 export const updateStatus = asyncHandler(async(req, res) => {
   const {applicationId, status} = req.body;
